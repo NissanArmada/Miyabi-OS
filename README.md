@@ -1,17 +1,30 @@
-# ⚔️ Miyabi-OS: High-Priority Asset Tracking & Aura Decomposition
+# ⚔️ Miyabi-OS: Tactical Surveillance HUD
+**Status: Phase 3 Deployment Complete [ULTRAWIDE OPTIMIZED]**
 
-## Overview
-Miyabi-OS is a lightweight, multi-threaded computer vision architecture designed for the real-time detection, tracking, and spectral analysis of Section 6 Operative Hoshimi Miyabi (Plush Variant). 
+A high-performance, real-time computer vision dashboard engineered to detect and track Section 6 assets with tactical precision. Built by a Software Engineering major at UTD with a serious "Odd Factor" obsession.
 
-Built to demonstrate scalable edge-computing principles, this suite utilizes **Forbidden Math™** to extract localized data without relying on heavy deep-learning inference.
+## 🌀 Key Features
+* **Dual-Layer Target Lock:** Utilizes HSV-space color segmentation to track specific optic signatures (red eyes) with high-confidence filtering.
+* **3D Vector Projection:** Overlays a dynamic, jitter-stabilized 3D bounding box that scales based on detection aptitude.
+* **Aura Analysis (FFT):** Real-time Fast Fourier Transform (FFT) mapping to visualize spatial frequency anomalies in the "Void Field."
+* **Cinematic Ultrawide Scaling:** Native support for 21:9 aspect ratios (3440x1440px) with automatic pillarboxing to prevent entity distortion.
+* **Active Sabotage Protocol:** Features a 150-frame delayed browser hijack and threaded Windows Action Center notifications upon critical lock-on.
 
-## 🧬 Core Architecture Features
-* **Eigen-Miyabi Decomposition:** Utilizes `scikit-learn` PCA to isolate the primary variance components of the asset's color space, determining "Aura Purity."
-* **FFT Spectral Shift Analysis:** Employs Fast Fourier Transforms (`np.fft`) to translate visual frames into the frequency domain, generating real-time heatmaps of physical "coolness."
-* **Laplacian Heuristics:** Calculates focal variance to ensure the asset's katana (or ears) remain mathematically sharp.
-* **Automated Incident Response:** Integrated SMTP protocols and localized audio sirens trigger when Confidence Intervals exceed 99.9%.
+## 🛠️ Technical Stack
+* **Language:** Python 3.11+
+* **Vision Engine:** OpenCV (cv2)
+* **Math:** NumPy (FFT & Matrix manipulation)
+* **OS Integration:** Plyer (Native Notifications), Webbrowser, & Threading
 
-## 💻 Usage
-```bash
-pip install opencv-python numpy scikit-learn pygame
-python main.py --target "miyabi" --aura_math "forbidden"
+## 🚀 Quick Start
+1. **Clone the sector:** ```bash
+    git clone [https://github.com/ethan-n-collins/Miyabi-OS](https://github.com/ethan-n-collins/Miyabi-OS)
+2. **Ignite the VENV:** ```powershell
+    .\venv\Scripts\activate
+3. **Install Gear:** ```bash
+    pip install -r requirements.txt
+4. **Engage:** ```bash
+    python main.py
+
+
+*(Note: Press **'q'** to retreat gracefully and release camera resources.)*

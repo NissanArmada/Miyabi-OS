@@ -53,26 +53,26 @@ class MiyabiDashboard:
     def _render_system_log(self, dashboard, confidence):
         """Render scrolling system log on the right sidebar"""
         log_x = self.primary_width + 20
-        log_y = 30
+        # FIX: Push the header down further so tactical messages have room above it!
+        header_y = 10 + (self.panel_small_height * 2) + 80 
         line_height = 18
         
-        # Log header
-        cv2.putText(dashboard, "SYSTEM LOG", (log_x, log_y - 10),
-                    self.font, 0.6, (0, 255, 255), 2)
-        
-        # Tactical messages
+        # 1. Draw Tactical Messages (Above the Log Header)
         tactical_messages = self._generate_tactical_messages(confidence)
         for i, msg in enumerate(tactical_messages):
-            y_pos = log_y + (i * line_height)
+            y_pos = 10 + (self.panel_small_height * 2) + 30 + (i * line_height)
             cv2.putText(dashboard, msg, (log_x, y_pos),
-                        self.font, self.font_scale, self.font_color, self.font_thickness)
+                        self.font, 0.5, (0, 255, 255), 1)
         
-        # System log entries
-        start_line = 4
-        for i, entry in enumerate(list(self.system_log)[-10:]):
-            y_pos = log_y + ((start_line + i) * line_height)
-            cv2.putText(dashboard, entry[:25], (log_x, y_pos),
-                        self.font, 0.4, (100, 200, 100), 1)
+        # 2. Log Header (Neon Cyan)
+        cv2.putText(dashboard, "--- SYSTEM LOG ---", (log_x, header_y),
+                    self.font, 0.5, (255, 255, 0), 1)
+        
+        # 3. System log entries (Scrolling at the very bottom)
+        for i, entry in enumerate(list(self.system_log)[-8:]):
+            y_pos = header_y + 25 + (i * line_height)
+            cv2.putText(dashboard, entry[:28], (log_x, y_pos),
+                        self.font, 0.4, (150, 255, 150), 1)
     
     def render(self, primary_frame, heatmap_frame, edge_frame, confidence=0, target_box=None):
         """
@@ -115,25 +115,35 @@ class MiyabiDashboard:
         
         # Resize and place heatmap (top right)
         heatmap_resized = cv2.resize(heatmap_frame, (self.panel_small_width, self.panel_small_height))
+        # FIX: Ensure heatmap is 3-channel BGR!
+        if len(heatmap_resized.shape) == 2:
+            heatmap_resized = cv2.applyColorMap(heatmap_resized, cv2.COLORMAP_JET)
+            
         dashboard[10:10+self.panel_small_height, 
                  self.primary_width+20:self.primary_width+20+self.panel_small_width] = heatmap_resized
         
         # Resize and place edge blueprint (bottom right)
         edge_resized = cv2.resize(edge_frame, (self.panel_small_width, self.panel_small_height))
+        # FIX: Ensure edges are 3-channel BGR!
         if len(edge_resized.shape) == 2:
             edge_resized = cv2.cvtColor(edge_resized, cv2.COLOR_GRAY2BGR)
+            
         dashboard[10+self.panel_small_height+10:10+self.panel_small_height+10+self.panel_small_height,
                  self.primary_width+20:self.primary_width+20+self.panel_small_width] = edge_resized
         
         # Panel labels
-        cv2.putText(dashboard, "PRIMARY FEED", (15, 25),
-                    self.font, 0.7, (0, 255, 255), 2)
-        cv2.putText(dashboard, "FFT AURA", (self.primary_width + 25, 25),
-                    self.font, 0.5, (0, 255, 255), 1)
-        cv2.putText(dashboard, "EDGE BLUEPRINT", (self.primary_width + 25, 260),
-                    self.font, 0.5, (0, 255, 255), 1)
+        # --- PANEL LABELS (NOW WITH TACTICAL DROP SHADOWS!) ---
+        def draw_shadow_text(img, text, pos, scale, color):
+            # Draw black shadow first!
+            cv2.putText(img, text, (pos[0]+2, pos[1]+2), self.font, scale, (0, 0, 0), 3)
+            # Draw main neon text over it!
+            cv2.putText(img, text, pos, self.font, scale, color, 2)
+
+        draw_shadow_text(dashboard, "THE HOSHIMI DECECTOR 9000", (15, 30), 0.8, (0, 255, 255))
+        draw_shadow_text(dashboard, "FFT AURA MAP", (self.primary_width + 25, 25), 0.6, (0, 255, 255))
+        draw_shadow_text(dashboard, "EDGE BLUEPRINT", (self.primary_width + 25, 260), 0.6, (0, 255, 255))
         
-        # Render system log
+        # Render system log at the bottom right
         self._render_system_log(dashboard, confidence)
         
         return dashboard
