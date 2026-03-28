@@ -1,1 +1,21 @@
-/venv
+# Python environment - DON'T UPLOAD THESE!
+venv/
+.venv/
+env/
+bin/
+lib/
+include/
+
+# Byte-compiled / optimized / DLLs
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.dll
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# Project-specific assets
+miyabi_siren.wav

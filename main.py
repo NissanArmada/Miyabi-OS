@@ -6,7 +6,8 @@ from alerts import MiyabiAlertSystem
 
 class MiyabiSurveillanceHUD:
     def __init__(self, target_name="miyabi"):
-        self.vision_core = Section6Vision()
+        # FIX 1: Unified the name to self.core!
+        self.core = Section6Vision()
         self.alert_system = MiyabiAlertSystem()
         self.target_name = target_name
         self.confidence_history = []
@@ -14,7 +15,6 @@ class MiyabiSurveillanceHUD:
         
     def draw_3d_bounding_box(self, frame, x, y, w, h, confidence):
         """Draw a 3D vector bounding box overlay"""
-        # Project 2D box to pseudo-3D
         depth_offset = int(10 * (confidence / 100))
         color = (0, int(255 * confidence / 100), 255)  # Cyan to red gradient
         
@@ -41,46 +41,51 @@ class MiyabiSurveillanceHUD:
         return cv2.addWeighted(frame, 0.6, blueprint, 0.4, 0)
     
     def process_frame(self, frame):
-        """Main frame processing pipeline"""
+        # FIX 4: Make time move forward so the Scouter fluctuates!
         self.frame_count += 1
-        height, width = frame.shape[:2]
         
-        # Apply blueprint aesthetic
+        # 1. Get detection data from the core
+        x, y, w, h, confidence = self.core.detect_miyabi_by_red_eyes(frame)
+        aura_map = self.core.fft_aura_analysis(frame)
+        
+        # 2. Create the HUD base (digital blueprint)
+        # FIX 2: Call self.apply_canny_blueprint, not self.core!
         hud_frame = self.apply_canny_blueprint(frame)
+        height, width, _ = hud_frame.shape
         
-        # Real detection: red eye tracking
-        x, y, w, h, confidence = self.vision_core.detect_miyabi_by_red_eyes(frame)
-        
-        # Fallback to pseudo-detection if nothing detected
-        if confidence == 0:
-            center_x, center_y = width // 2, height // 2
-            box_size = 50
-            x, y, w, h = center_x - box_size, center_y - box_size, box_size * 2, box_size * 2
-            confidence = 0
-        
-        self.confidence_history.append(confidence)
-        
-        # Draw 3D bounding box
-        hud_frame = self.draw_3d_bounding_box(hud_frame, x, y, w, h, confidence)
-        
-        # FFT aura overlay (top-right corner)
-        aura_map = self.vision_core.fft_aura_analysis(frame)
+        # 3. Paste the FFT Aura Heatmap
         aura_resized = cv2.resize(aura_map, (200, 150))
-        hud_frame[20:170, width-220:width-20] = aura_resized
-        
-        # HUD text overlay
-        cv2.putText(hud_frame, f"CONFIDENCE: {confidence:.1f}%", (20, 30), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-        cv2.putText(hud_frame, f"DETECTION: {'LOCKED' if confidence > 0 else 'SEARCHING'}", (20, 70), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-        cv2.putText(hud_frame, f"FRAME: {self.frame_count}", (20, 110), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
-        
-        # Trigger alerts at 80% confidence
-        if confidence >= 80.0:
+        aura_color = cv2.applyColorMap(aura_resized, cv2.COLORMAP_JET)
+        hud_frame[20:170, width-220:width-20] = aura_color
+
+        # --- SCOUTER MODE & ALERTS ---
+        if confidence >= 80.0 and not self.alert_system.siren_triggered:
             self.alert_system.trigger_siren()
-            self.alert_system.send_alert_email(self.target_name, confidence, self.frame_count)
+        elif confidence < 40.0:
+            self.alert_system.siren_triggered = False
         
+        color = (0, 255, 0) if confidence < 80 else (0, 0, 255)
+        
+        # Display the boring Confidence Percentage (Hmph!)
+        cv2.putText(hud_frame, f"CONFIDENCE: {confidence:.1f}%", (20, 40), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)
+        
+        status_text = "STATUS: NOMINAL"
+        if confidence >= 80:
+            status_text = "MIYABI SPOTTED!"
+        elif confidence > 0:
+            status_text = "DETECTING ANOMALY..."
+        else:
+            status_text = "SCANNING VOID..."
+            
+        cv2.putText(hud_frame, status_text, (20, 85), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+
+        # 4. Draw the 3D Vector Box if locked
+        if x is not None:
+            # FIX 3: Call self.draw_3d_bounding_box and pass all the right variables!
+            self.draw_3d_bounding_box(hud_frame, x, y, w, h, confidence)
+            
         return hud_frame, confidence
 
 def main():

@@ -32,11 +32,9 @@ class Section6Vision:
     def detect_miyabi_by_red_eyes(self, frame):
         """Detect Miyabi plushie by red eye markers"""
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        
-        # Red color range (HSV)
-        lower_red1 = np.array([0, 100, 100])
+        lower_red1 = np.array([0, 70, 50])
         upper_red1 = np.array([10, 255, 255])
-        lower_red2 = np.array([170, 100, 100])
+        lower_red2 = np.array([170, 70, 50])
         upper_red2 = np.array([180, 255, 255])
         
         mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
@@ -47,9 +45,9 @@ class Section6Vision:
         
         if contours:
             largest = max(contours, key=cv2.contourArea)
-            if cv2.contourArea(largest) > 50:  # Filter noise
+            if cv2.contourArea(largest) > 500:  # BAKA FAN FILTER
                 x, y, w, h = cv2.boundingRect(largest)
-                confidence = min(100, (cv2.contourArea(largest) / 1000))
+                confidence = min(100.0, (cv2.contourArea(largest) / 15.0)) # CURVED GRADE
                 return x, y, w, h, confidence
         
         return None, None, None, None, 0
